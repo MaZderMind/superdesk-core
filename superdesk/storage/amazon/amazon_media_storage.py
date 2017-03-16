@@ -81,8 +81,9 @@ class AmazonMediaStorage(MediaStorage):
 
     def __init__(self, app=None):
         super().__init__(app)
-        username, api_key = self.read_from_config()
+        username, api_key, endpoint_url = self.read_from_config()
         self.client = boto3.client('s3',
+                                   endpoint_url=endpoint_url,
                                    aws_access_key_id=username,
                                    aws_secret_access_key=api_key,
                                    region_name=self.region)
@@ -141,11 +142,12 @@ class AmazonMediaStorage(MediaStorage):
         self.region = self.app.config.get('AMAZON_REGION', 'us-east-1') or 'us-east-1'
         username = self.app.config['AMAZON_ACCESS_KEY_ID']
         api_key = self.app.config['AMAZON_SECRET_ACCESS_KEY']
+        endpoint_url = self.app.config['AMAZON_ENDPOINT_URL']
         self.container_name = self.app.config['AMAZON_CONTAINER_NAME']
         self.kwargs = {}
         if self.app.config.get('AMAZON_SERVE_DIRECT_LINKS', False):
             self.kwargs['ACL'] = 'public-read'
-        return username, api_key
+        return username, api_key, endpoint_url
 
     def get(self, id_or_filename, resource=None):
         """ Opens the file given by name or unique id. Note that although the
